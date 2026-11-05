@@ -9,26 +9,32 @@ pipeline {
     stages {
         stage("incrementVersion") {
             steps {
-                dir('app') {
+                script {
+                    dir('app') {
                     sh "npm version ${params.VERSION_BUMP} --no-git-tag-version"
                     def packageJason = readJSON file: 'package.json'
                     def version = packageJson.version
                     env.IMAGE_NAME = "$version-$BUILD_NUMBER"
+                    }
                 }
             }
         }
         stage ("test") {
             steps {
-                dir('app') {
+                script {
+                    dir('app') {
                     sh 'npm ci'
                     sh 'npm test'
+                    }
                 }
             }
         }
         stage ("buildImage") {
             steps {
-                dir('app') {
+                script {
+                    dir('app') {
                     sh 'docker build --platform linux/amd64 -t destinyship/dev-projects-app:${IMAGE_NAME} .'
+                    }
                 }
             }
         }
