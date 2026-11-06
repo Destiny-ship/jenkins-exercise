@@ -9,7 +9,7 @@ def incrementVersion() {
     }
 }
 
-def testImage() {
+def testCode() {
 dir('app') {
     sh 'npm ci'
     sh 'npm test'

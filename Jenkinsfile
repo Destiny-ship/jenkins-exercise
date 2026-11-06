@@ -1,7 +1,8 @@
 #!/usr/bin/env groovy
-def gv
+@Library('node-shared-library') _
+
 pipeline {
-    agent any 
+    agent any
     tools {
         nodejs 'node24'
     }
@@ -9,49 +10,30 @@ pipeline {
         choice(name: 'VERSION_BUMP', choices: ['minor', 'patch', 'major'], description: 'Which part of the version to increment')
     }
     stages {
-        stage("init") {
-            steps {
-                script {
-                    gv = load "script.groovy"
-                }
-            }
-        }
         stage("incrementVersion") {
             steps {
-                script {
-                    gv.incrementVersion()
-                }
+                incrementVersion()
             }
         }
-        stage ("testImage") {
+        stage("testCode") {
             steps {
-                script {
-                   gv.testImage() 
-                }
+                testCode()
             }
         }
-        stage ("buildImage") {
+        stage("buildImage") {
             steps {
-                script {
-                    gv.buildImage()
-                }
+                buildImage "destinyship/dev-projects-app:${env.IMAGE_NAME}"
             }
         }
-        stage ("pushImage") {
+        stage("pushImage") {
             steps {
-                script {
-                   gv.pushImage()
-                }
+                pushImage "destinyship/dev-projects-app:${env.IMAGE_NAME}", 'docker-hub-repo'
             }
         }
-        stage ("commitToGit") {
+        stage("commit") {
             steps {
-                script {
-                    gv.commitToGit()
-                }
+                commitToGit 'github-cred', 'github.com/Destiny-ship/jenkins-exercise.git'
             }
         }
     }
 }
-
-// test it
